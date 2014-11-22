@@ -12,7 +12,11 @@ def roll_die(sides=6):
 
 def roll_dice(num=2, sides=6):
     """Throw multiple dice and return their results."""
-    return [roll_die(sides) for i in xrange(num)]
+    if type(sides) == int:
+        return [roll_die(sides) for i in xrange(num)]
+    elif type(sides) == list:
+        assert len(sides) == num
+        return [roll_die(s) for s in sides]
 
 
 def reroll_dice(rerolls=3, num=2, sides=6):
@@ -39,12 +43,16 @@ def keep_some_unique(outcome, num=5):
     return list(s)
 
 
-def count_sixes(listy):
-    return listy.count(6)
+def ordered_dice(outcome):
+    return tuple(sorted(outcome))
 
 
-def count_unique(listy):
-    return len(set(listy))
+def count_sixes(outcome):
+    return outcome.count(6)
+
+
+def count_unique(outcome):
+    return len(set(outcome))
 
 
 def reroll_dice_with_choice(keep_strategy=keep_sixes, rerolls=3, num=2, sides=6):
@@ -91,8 +99,8 @@ def count_outcomes(values):
     """Count the number of identical outcomes and return histogram."""
     count_dict = {}
     for value in values:
-        if type(value) == list:
-            value = tuple(sorted(value))
+        # The outcome values have to be hashable to be inserted into dict
+        # Outcomes containing lists should therefore be reduced to tuples
         if value in count_dict:
             count_dict[value] += 1
         else:
@@ -119,17 +127,28 @@ def run_multiple_times_and_print_stats(func, N=100):
         print "%s: %.2f %%" % (k, v)
 
 
+def keep_test(outcome):
+    return [d for d in outcome if d == 1 or d == 2]
+
+
+def count_test(outcome):
+    return outcome.count(1) + outcome.count(2)
+    # return (outcome.count(1), outcome.count(2))
+
+
 def parse_args():
     keep_options = {
         "none": keep_none,
         "sixes": keep_sixes,
-        "unique": keep_unique
+        "unique": keep_unique,
+        "test": keep_test,
     }
 
     reduce_options = {
-        "none": lambda x: x,
+        "none": ordered_dice,
         "count_sixes": count_sixes,
-        "count_unique": count_unique
+        "count_unique": count_unique,
+        "test": count_test,
     }
 
     parser = argparse.ArgumentParser(
@@ -137,20 +156,20 @@ def parse_args():
     parser.add_argument("-n", dest="num", type=int, default=1,
                         help="Specify the number of dice to throw.")
     parser.add_argument("-s", dest="sides", type=int, default=6,
-                        help="Specify the number of sides each dice has.")
-    parser.add_argument("-ss", dest="multi_sides", nargs="*",
-                        help="[TODO] Specify the number of sides for each dice.")
+                        help="Specify the number of sides all dice have.")
+    parser.add_argument("-ss", dest="multi_sides", type=int, nargs="*", metavar="SIDES",
+                        help="Specify the number of sides for each individual die.")
     parser.add_argument("-r", dest="reroll", type=int, default=1,
                         help="Perform multiple rerolls (stats only count last roll).")
     parser.add_argument("--keep", default="none", choices=keep_options.keys(),
                         help="Choose a keeping strategy when performing rerolls.")
     parser.add_argument("--stats", nargs="?", const="none", choices=reduce_options.keys(),
-                        help="Performs multiple throws and outputs cumulative results. " + \
+                        help="Performs multiple throws and outputs cumulative results. " +
                         "Provide a parameter to choose an approach for reducing a dice throw to a single value of interest.", )
     parser.add_argument("-N", type=int, default=1000, metavar="simulations",
                         help="Set the number of simulations to run for statistical results.", )
     args = parser.parse_args()
-    print args
+
     args.keep = keep_options[args.keep]
     if args.stats is not None:
         args.stats = reduce_options[args.stats]
@@ -158,9 +177,7 @@ def parse_args():
     if args.multi_sides is not None:
         if len(args.multi_sides) != args.num:
             raise Exception("'-ss' parameter has to specify the same number of values as there are dice.")
-        for value in args.multi_sides:
-            if not value.isdigit():
-                raise Exception("'-ss' parameter has to consist of only integer numbers.")
+        args.sides = args.multi_sides
 
     return args
 
@@ -179,10 +196,10 @@ def main():
         run_multiple_times_and_print_stats(perform_roll, N=settings.N)
     else:
         results = reroll_dice_with_choice(
-                    keep_strategy=settings.keep,
-                    rerolls=settings.reroll,
-                    num=settings.num,
-                    sides=settings.sides)
+            keep_strategy=settings.keep,
+            rerolls=settings.reroll,
+            num=settings.num,
+            sides=settings.sides)
         for result in results:
             print result
 
