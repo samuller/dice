@@ -100,20 +100,21 @@ def count_outcomes(values):
     count_dict = {}
     for value in values:
         # The outcome values have to be hashable to be inserted into dict
-        # Outcomes containing lists should therefore be reduced to tuples
+        # Outcomes containing lists should therefore be converted to tuples
         if value in count_dict:
             count_dict[value] += 1
         else:
             count_dict[value] = 0
-    ordered_count_dict = OrderedDict(sorted(count_dict.items()))
-    return ordered_count_dict
+    return count_dict
 
 
 def hist_counts_to_probabilities(hist):
     """Convert a histogram of event counts into probabilities."""
     total = 0
+    # Count total number of events
     for k, v in hist.iteritems():
         total += hist[k]
+    # Divide number of events by total and get percentage
     for k, v in hist.iteritems():
         hist[k] = 100 * (v / float(total))
     return hist
@@ -123,17 +124,20 @@ def run_multiple_times_and_print_stats(func, N=100):
     outcomes = run_many_times(func, times=N)
     hist = count_outcomes(outcomes)
     odds = hist_counts_to_probabilities(hist)
+    # Use an ordered dict so that we can print with sorted keys
+    odds = OrderedDict(sorted(odds.items()))
     for k, v in odds.iteritems():
         print "%s: %.2f %%" % (k, v)
 
 
 def keep_test(outcome):
-    return [d for d in outcome if d == 1 or d == 2]
+    return [d for d in outcome if eval("d == 1 or d == 2")]
 
 
-def count_test(outcome):
+def count_test(outcome, num=6):
     return outcome.count(1) + outcome.count(2)
     # return (outcome.count(1), outcome.count(2))
+    # return tuple([outcome.count(n) for n in xrange(num)])
 
 
 def parse_args():
@@ -186,6 +190,7 @@ def main():
     settings = parse_args()
 
     if settings.stats is not None:
+        # Perform multiple simulations and output statistical results
         def perform_roll():
             return settings.stats(
                 reroll_dice_with_choice_last_only(
@@ -195,6 +200,7 @@ def main():
                     sides=settings.sides))
         run_multiple_times_and_print_stats(perform_roll, N=settings.N)
     else:
+        # Perform a single simulation and output results
         results = reroll_dice_with_choice(
             keep_strategy=settings.keep,
             rerolls=settings.reroll,
