@@ -1,6 +1,7 @@
 from random import randint
 from collections import OrderedDict
 from copy import copy
+import argparse
 
 
 def roll_die(sides=6):
@@ -123,28 +124,44 @@ def run_strat_and_print_process(keep_strategy):
     print roll_and_print()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Simulating various dice throw situations.')
+    parser.add_argument('--stats', type=int, nargs='?', const=1000,  # action="store_true"
+                        help='Performs multiple throws and outputs cumulative results.', )
+    parser.add_argument('-s', '--sides', type=int, default=6,
+                        help='Specify the number of sides each dice has.')
+    parser.add_argument('-n', '--num', type=int, default=2,
+                        help='Specify the number of dice to throw.',)
+    args = parser.parse_args()
+    return args
+
+
 def main():
+    settings = parse_args()
+
     def roll_sixes():
         return count_sixes(
             reroll_dice_with_choice(
                 keep_strategy=strategy_keep_sixes,
-                rerolls=3, num=6, sides=6))
-        # return count_sixes(roll_dice(num=6, sides=6))
+                rerolls=3, num=settings.num, sides=settings.sides))
+        # return count_sixes(roll_dice(num=6, sides=settings.sides))
 
     def roll_unique():
         return count_unique(
             # roll_dice(num=6, sides=6))
             reroll_dice_with_choice(
                 keep_strategy=strategy_keep_unique,
-                rerolls=3, num=6, sides=6))
+                rerolls=3, num=settings.num, sides=6))
             # reroll_dice_with_choice(
             #   keep_strategy=strategy_keep_some_unique,
-            #   rerolls=3, num=6, sides=6))
+            #   rerolls=3, num=settings.num, sides=settings.sides))
 
-    run_multiple_times_and_print_stats(roll_unique, N=10000)
-
-    #run_strat_and_print_process(strategy_keep_sixes)
-    #run_strat_and_print_process(strategy_keep_unique)
+    if settings.stats is not None:
+        run_multiple_times_and_print_stats(roll_unique, N=10000)
+    else:
+        run_strat_and_print_process(strategy_keep_sixes)
+        run_strat_and_print_process(strategy_keep_unique)
 
 
 if __name__ == "__main__":
