@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from random import randint
 from collections import OrderedDict
 from copy import copy
@@ -145,20 +146,20 @@ def main():
             reroll_dice_with_choice(
                 keep_strategy=strategy_keep_sixes,
                 rerolls=3, num=settings.num, sides=settings.sides))
-        # return count_sixes(roll_dice(num=6, sides=settings.sides))
+        # return count_sixes(roll_dice(num=settings.num, sides=settings.sides))
 
     def roll_unique():
         return count_unique(
-            # roll_dice(num=6, sides=6))
+            # roll_dice(num=settings.num, sides=settings.sides))
             reroll_dice_with_choice(
                 keep_strategy=strategy_keep_unique,
-                rerolls=3, num=settings.num, sides=6))
+                rerolls=3, num=settings.num, sides=settings.sides))
             # reroll_dice_with_choice(
             #   keep_strategy=strategy_keep_some_unique,
             #   rerolls=3, num=settings.num, sides=settings.sides))
 
     if settings.stats is not None:
-        run_multiple_times_and_print_stats(roll_unique, N=10000)
+        run_multiple_times_and_print_stats(roll_unique, N=settings.stats)
     else:
         run_strat_and_print_process(strategy_keep_sixes)
         run_strat_and_print_process(strategy_keep_unique)
