@@ -20,23 +20,27 @@ def roll_dice(num=2, sides=6):
 
 
 def reroll_dice(rerolls=3, num=2, sides=6):
+    """Performs multiple dice rolls and and returns their results."""
     return [roll_dice(num, sides) for i in xrange(rerolls)]
 
 
 def keep_sixes(outcome):
-    """An example strategy that keeps all dices that land on six."""
+    """A keep strategy that keeps all dices that land on six."""
     return [d for d in outcome if d == 6]
 
 
 def keep_none(outcome):
+    """A keep strategy that never keeps any dice."""
     return []
 
 
 def keep_unique(outcome):
+    """A keep strategy that throws away duplicates."""
     return list(set(outcome))
 
 
 def keep_some_unique(outcome, num=5):
+    """A keep strategy that throws away duplicates, but never keeps more than 'num' dice."""
     s = set(outcome)
     while len(s) > num:
         elem = s.pop()
@@ -44,14 +48,17 @@ def keep_some_unique(outcome, num=5):
 
 
 def ordered_dice(outcome):
+    """A reduction function for a set of dice values where order doesn't matter."""
     return tuple(sorted(outcome))
 
 
 def count_sixes(outcome):
+    """A reduction function for counting sixes."""
     return outcome.count(6)
 
 
 def count_unique(outcome):
+    """A reduction function for counting how many values are unique."""
     return len(set(outcome))
 
 
@@ -109,10 +116,11 @@ def count_outcomes(values):
 
 
 def count_total_events(hist):
+    """Sum the number of values in a histogram (which are values in a dictionary)."""
     total = 0
     # Count total number of events
-    for k, v in hist.iteritems():
-        total += hist[k]
+    for key in hist:
+        total += hist[key]
     return total
 
 
