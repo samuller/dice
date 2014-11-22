@@ -104,30 +104,45 @@ def count_outcomes(values):
         if value in count_dict:
             count_dict[value] += 1
         else:
-            count_dict[value] = 0
+            count_dict[value] = 1
     return count_dict
 
 
-def hist_counts_to_probabilities(hist):
-    """Convert a histogram of event counts into probabilities."""
+def count_total_events(hist):
     total = 0
     # Count total number of events
     for k, v in hist.iteritems():
         total += hist[k]
-    # Divide number of events by total and get percentage
+    return total
+
+
+def hist_counts_to_probabilities(hist):
+    """Convert a histogram of event counts into probabilities."""
+    total = count_total_events(hist)
+    # Divide number of events by total to get probabilities
     for k, v in hist.iteritems():
-        hist[k] = 100 * (v / float(total))
+        hist[k] = (v / float(total))
     return hist
 
 
-def run_multiple_times_and_print_stats(func, N=100):
+def run_multiple_times_and_print_stats(func, N=100, use_percentages=False):
+    """Run a function N times and print out a histogram of the results."""
     outcomes = run_many_times(func, times=N)
     hist = count_outcomes(outcomes)
-    odds = hist_counts_to_probabilities(hist)
-    # Use an ordered dict so that we can print with sorted keys
-    odds = OrderedDict(sorted(odds.items()))
-    for k, v in odds.iteritems():
-        print "%s: %.2f %%" % (k, v)
+
+    if use_percentages:
+        odds = hist_counts_to_probabilities(hist)
+        # Use an ordered dict so that we can print with sorted keys
+        odds = OrderedDict(sorted(odds.items()))
+        for k, v in odds.iteritems():
+            # Print probabilities as percentages
+            print "%s: %.2f %%" % (k, 100*v)
+    else:
+        total = count_total_events(hist)
+        # Use an ordered dict so that we can print with sorted keys
+        hist = OrderedDict(sorted(hist.items()))
+        for k, v in hist.iteritems():
+            print "%s: %d out of %d" % (k, v, total)
 
 
 def keep_test(outcome):
@@ -150,6 +165,7 @@ def parse_args():
 
     reduce_options = {
         "none": ordered_dice,
+        "sum": sum,
         "count_sixes": count_sixes,
         "count_unique": count_unique,
         "test": count_test,
@@ -172,6 +188,8 @@ def parse_args():
                         "Provide a parameter to choose an approach for reducing a dice throw to a single value of interest.", )
     parser.add_argument("-N", type=int, default=1000, metavar="simulations",
                         help="Set the number of simulations to run for statistical results.", )
+    parser.add_argument("--counts", default=False, action="store_true",
+                        help="Print actual event counts instead of percentages in the statistical results.", )
     args = parser.parse_args()
 
     args.keep = keep_options[args.keep]
@@ -198,7 +216,9 @@ def main():
                     rerolls=settings.reroll,
                     num=settings.num,
                     sides=settings.sides))
-        run_multiple_times_and_print_stats(perform_roll, N=settings.N)
+        run_multiple_times_and_print_stats(perform_roll,
+                                           N=settings.N,
+                                           use_percentages=not settings.counts)
     else:
         # Perform a single simulation and output results
         results = reroll_dice_with_choice(
