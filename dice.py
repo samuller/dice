@@ -50,19 +50,29 @@ def reroll_dice(rerolls=3, num=2, sides=6):
 def reroll_dice_with_choice(keep_strategy=keep_sixes, rerolls=3, num=2, sides=6):
     """Perform multiple rerolls, but with the choice to keep some dice the same
     and reroll all the others."""
-    outcome = roll_dice(num, sides)
-    for i in xrange(rerolls):
-        to_keep = keep_strategy(outcome)
+    outcomes = []
+    outcomes.append(roll_dice(num, sides))
+    for i in xrange(rerolls - 1):
+        prev_outcome = copy(outcomes[-1])
+        to_keep = keep_strategy(prev_outcome)
         new_outcome = []
         for d in to_keep:
-            if d in outcome:
+            if d in prev_outcome:
                 new_outcome.append(d)
-                outcome.remove(d)
+                prev_outcome.remove(d)
             else:
                 assert False, "Keep_strategy() result is corrupt: %s for %s" % \
                               (to_keep, outcome)
         new_outcome.extend(roll_dice(num - len(new_outcome), sides))
-        outcome = new_outcome
+        outcomes.append(new_outcome)
+    return outcomes
+
+
+def reroll_dice_with_choice_last_only(keep_strategy=keep_sixes, rerolls=3, num=2, sides=6):
+    """Perform multiple rerolls, but with the choice to keep some dice the same
+    and reroll all the others."""
+    outcomes = reroll_dice_with_choice(keep_strategy, rerolls, num, sides)
+    outcome = outcomes[-1]
     return outcome
 
 
@@ -110,27 +120,11 @@ def run_multiple_times_and_print_stats(func, N=100):
         print "%s: %.2f %%" % (k, v)
 
 
-def run_strat_and_print_process(keep_strategy):
-    def keep_strategy_and_print(outcome):
-        to_keep = keep_strategy(outcome)
-        print "%s -> %s" % (outcome, to_keep)
-        return to_keep
-
-    def roll_and_print():
-         final_outcome = reroll_dice_with_choice(
-                keep_strategy=keep_strategy_and_print,
-                rerolls=3, num=6, sides=6)
-         print final_outcome
-         return count_sixes(final_outcome)
-
-    #run_multiple_times_and_print_stats(roll, N=10000)
-    print roll_and_print()
-
-
 def parse_args():
     keep_options = {
         "none": keep_none,
-        "sixes": keep_sixes
+        "sixes": keep_sixes,
+        "unique": keep_unique
     }
 
     reduce_options = {
@@ -140,23 +134,24 @@ def parse_args():
     }
 
     parser = argparse.ArgumentParser(
-        description='Simulating various dice throw situations.')
-    parser.add_argument('--stats', type=int, nargs='?', const=1000,
-                        help='Performs multiple throws and outputs cumulative results.', )
-    parser.add_argument('--reduce', default='none', choices=reduce_options.keys(),
-                        help='Choose an approach for reducing a dice throw to a single value of interest.', )
-    parser.add_argument('-s', '--sides', type=int, default=6,
-                        help='Specify the number of sides each dice has.')
-    parser.add_argument('-n', '--num', type=int, default=1,
-                        help='Specify the number of dice to throw.')
-    parser.add_argument('-r', '--reroll', type=int, default=1,
-                        help='Perform multiple rerolls (stats only count last roll).')
-    parser.add_argument('--keep', default='none', choices=keep_options.keys(),
-                        help='Choose a keeping strategy when performing rerolls.')
+        description="Simulating various dice throw situations.")
+    parser.add_argument("-n", "--num", type=int, default=1,
+                        help="Specify the number of dice to throw.")
+    parser.add_argument("-s", "--sides", type=int, default=6,
+                        help="Specify the number of sides each dice has.")
+    parser.add_argument("-r", "--reroll", type=int, default=1,
+                        help="Perform multiple rerolls (stats only count last roll).")
+    parser.add_argument("--keep", default="none", choices=keep_options.keys(),
+                        help="Choose a keeping strategy when performing rerolls.")
+    parser.add_argument("--stats", nargs="?", const="none", choices=reduce_options.keys(),
+                        help="Performs multiple throws and outputs cumulative results. " + \
+                        "Provide a parameter to choose an approach for reducing a dice throw to a single value of interest.", )
+    parser.add_argument("-N", "--simulations", type=int, default=1000,
+                        help="Set the number of simulations to run for statistical results.", )
     args = parser.parse_args()
 
     args.keep = keep_options[args.keep]
-    args.reduce = reduce_options[args.reduce]
+    args.stats = reduce_options[args.stats]
 
     return args
 
@@ -164,37 +159,23 @@ def parse_args():
 def main():
     settings = parse_args()
 
-    def roll_sixes():
-        return count_sixes(
-            reroll_dice_with_choice(
-                keep_strategy=keep_sixes,
-                rerolls=settings.reroll, num=settings.num, sides=settings.sides))
-        # return count_sixes(roll_dice(num=settings.num, sides=settings.sides))
-
-    def roll_unique():
-        return count_unique(
-            # roll_dice(num=settings.num, sides=settings.sides))
-            reroll_dice_with_choice(
-                keep_strategy=keep_unique,
-                rerolls=settings.reroll, num=settings.num, sides=settings.sides))
-            # reroll_dice_with_choice(
-            #   keep_strategy=keep_some_unique,
-            #   rerolls=settings.reroll, num=settings.num, sides=settings.sides))
-
     if settings.stats is not None:
         def perform_roll():
-            return settings.reduce(
-                reroll_dice(
+            return settings.stats(
+                reroll_dice_with_choice_last_only(
+                    keep_strategy=settings.keep,
                     rerolls=settings.reroll,
                     num=settings.num,
-                    sides=settings.sides)[-1])
-        run_multiple_times_and_print_stats(perform_roll, N=settings.stats)
+                    sides=settings.sides))
+        run_multiple_times_and_print_stats(perform_roll, N=settings.simulations)
     else:
-        results = reroll_dice(rerolls=settings.reroll, num=settings.num, sides=settings.sides)
+        results = reroll_dice_with_choice(
+                    keep_strategy=settings.keep,
+                    rerolls=settings.reroll,
+                    num=settings.num,
+                    sides=settings.sides)
         for result in results:
             print result
-        # run_strat_and_print_process(keep_sixes)
-        # run_strat_and_print_process(keep_unique)
 
 
 if __name__ == "__main__":
