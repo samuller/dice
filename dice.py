@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+import sys
+if sys.version_info.major != 2:
+    raise Exception("Only Python version 2 supported, not %s." %
+                    ".".join(map(str, sys.version_info[0:3])))
 from random import randint
 from collections import OrderedDict
 from copy import copy
@@ -47,19 +51,37 @@ def keep_some_unique(outcome, num=5):
     return list(s)
 
 
-def ordered_dice(outcome):
+def order_dice(outcome, values_of_interest):
     """A reduction function for a set of dice values where order doesn't matter."""
+    for value in copy(outcome):
+        # Completely ignore dice that don't have values of interest
+        if value not in values_of_interest:
+            outcome.remove(value)
     return tuple(sorted(outcome))
 
 
-def count_sixes(outcome):
-    """A reduction function for counting sixes."""
-    return outcome.count(6)
-
-
-def count_unique(outcome):
+def count_unique(outcome, values_of_interest):
     """A reduction function for counting how many values are unique."""
     return len(set(outcome))
+
+
+def sum_values(outcome, values_of_interest):
+    """A reduction function for summing the values in a result."""
+    if len(values_of_interest) == 0:
+        return sum(outcome)
+    # Only sum dice with values of interest
+    total = 0
+    for value in values_of_interest:
+        total += outcome.count(value) * value
+    return total
+
+
+def count_values(outcome, values_of_interest):
+    """A reduction function for counting the number of given values on a result."""
+    count = 0
+    for value in values_of_interest:
+        count += outcome.count(value)
+    return count
 
 
 def reroll_dice_with_choice(keep_strategy=keep_sixes, rerolls=3, num=2, sides=6):
@@ -153,14 +175,27 @@ def run_multiple_times_and_print_stats(func, N=100, use_percentages=False):
             print "%s: %d out of %d" % (k, v, total)
 
 
-def keep_test(outcome):
-    return [d for d in outcome if eval("d == 1 or d == 2")]
+def parse_arg_reduce_function(args):
+    reduce_options = {
+        "sum": sum_values,
+        "order": order_dice,
+        "count": count_values,
+        "unique": count_unique,
+        # "combination": order_dice,
+    }
+    if args == []:
+        args = ["sum"]
 
+    if args[0] in reduce_options:
+        func = reduce_options[args[0]]
+    else:
+        raise Exception("'--stats' parameter has to specify a valid reduction function, " +
+                        " not '%s'. Valid options are: %s" % (args[0], reduce_options.keys()))
+    reduce_args = []
+    for arg in args[1:]:
+        reduce_args.append(int(arg))
 
-def count_test(outcome, num=6):
-    return outcome.count(1) + outcome.count(2)
-    # return (outcome.count(1), outcome.count(2))
-    # return tuple([outcome.count(n) for n in xrange(num)])
+    return func, reduce_args
 
 
 def parse_args():
@@ -168,15 +203,6 @@ def parse_args():
         "none": keep_none,
         "sixes": keep_sixes,
         "unique": keep_unique,
-        "test": keep_test,
-    }
-
-    reduce_options = {
-        "none": ordered_dice,
-        "sum": sum,
-        "count_sixes": count_sixes,
-        "count_unique": count_unique,
-        "test": count_test,
     }
 
     parser = argparse.ArgumentParser(
@@ -191,7 +217,7 @@ def parse_args():
                         help="Perform multiple rerolls (stats only count last roll).")
     parser.add_argument("--keep", default="none", choices=keep_options.keys(),
                         help="Choose a keeping strategy when performing rerolls.")
-    parser.add_argument("--stats", nargs="?", const="none", choices=reduce_options.keys(),
+    parser.add_argument("--stats", nargs="*",
                         help="Performs multiple throws and outputs cumulative results. " +
                         "Provide a parameter to choose an approach for reducing a dice throw to a single value of interest.", )
     parser.add_argument("-N", type=int, default=1000, metavar="simulations",
@@ -199,10 +225,11 @@ def parse_args():
     parser.add_argument("--counts", default=False, action="store_true",
                         help="Print actual event counts instead of percentages in the statistical results.", )
     args = parser.parse_args()
-
+    print args
     args.keep = keep_options[args.keep]
+
     if args.stats is not None:
-        args.stats = reduce_options[args.stats]
+        args.stats = parse_arg_reduce_function(args.stats)
 
     if args.multi_sides is not None:
         if len(args.multi_sides) != args.num:
@@ -218,12 +245,13 @@ def main():
     if settings.stats is not None:
         # Perform multiple simulations and output statistical results
         def perform_roll():
-            return settings.stats(
+            return settings.stats[0](
                 reroll_dice_with_choice_last_only(
                     keep_strategy=settings.keep,
                     rerolls=settings.reroll,
                     num=settings.num,
-                    sides=settings.sides))
+                    sides=settings.sides),
+                settings.stats[1] if len(settings.stats) == 2 else None)
         run_multiple_times_and_print_stats(perform_roll,
                                            N=settings.N,
                                            use_percentages=not settings.counts)
