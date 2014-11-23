@@ -43,6 +43,11 @@ def keep_unique(outcome, values_of_interest=None):
     return list(set(outcome))
 
 
+def keep_duplicates(outcome, values_of_interest=None):
+    """A keep strategy that keeps only duplicates."""
+    return [d for d in outcome if outcome.count(d) > 1]
+
+
 def keep_some_unique(outcome, num=5):
     """A keep strategy that throws away duplicates, but never keeps more than 'num' dice."""
     s = set(outcome)
@@ -85,6 +90,11 @@ def count_values(outcome, values_of_interest):
     for value in values_of_interest:
         count += outcome.count(value)
     return count
+
+
+def dice_throw(outcome, values_of_interest):
+    """A reduction function that keeps the precise result of the dice throws (including order)."""
+    return tuple(outcome)
 
 
 def reroll_dice_with_choice(keep_strategy=keep_none, rerolls=3, num=2, sides=6):
@@ -186,7 +196,7 @@ def parse_arg_reduce_function(args):
         "order": (order_dice, "ordered dice values"),
         "count": (count_values, "number of dice with the value %s"),
         "unique": (count_unique, "number of unique dice in a throw"),
-        # "combination": order_dice,
+        "values": (dice_throw, "dice values"),
     }
     if len(args) == 0:
         args = ["sum"]
@@ -211,6 +221,7 @@ def parse_arg_keep_function(args):
         "none": keep_none,
         "value": keep_value,
         "unique": keep_unique,
+        "duplicate": keep_duplicates,
     }
     if args is None or len(args) == 0:
         args = ["none"]
