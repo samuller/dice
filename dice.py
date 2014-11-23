@@ -206,7 +206,8 @@ def parse_args():
     }
 
     parser = argparse.ArgumentParser(
-        description="Simulating various dice throw situations.")
+        description="Simulating various dice throw situations.", add_help=False)
+    parser.add_argument("-h", "--help", action="help", help="Show this help message and exit.")
     parser.add_argument("-n", dest="num", type=int, default=1,
                         help="Specify the number of dice to throw.")
     parser.add_argument("-s", dest="sides", type=int, default=6,
@@ -217,7 +218,7 @@ def parse_args():
                         help="Perform multiple rerolls (stats only count last roll).")
     parser.add_argument("--keep", default="none", choices=keep_options.keys(),
                         help="Choose a keeping strategy when performing rerolls.")
-    parser.add_argument("--stats", nargs="*",
+    parser.add_argument("--stats", nargs="*", metavar="reduce",
                         help="Performs multiple throws and outputs cumulative results. " +
                         "Provide a parameter to choose an approach for reducing a dice throw to a single value of interest.", )
     parser.add_argument("-N", type=int, default=1000, metavar="simulations",
@@ -225,7 +226,7 @@ def parse_args():
     parser.add_argument("--counts", default=False, action="store_true",
                         help="Print actual event counts instead of percentages in the statistical results.", )
     args = parser.parse_args()
-    print args
+
     args.keep = keep_options[args.keep]
 
     if args.stats is not None:
