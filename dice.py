@@ -53,6 +53,9 @@ def keep_some_unique(outcome, num=5):
 
 def order_dice(outcome, values_of_interest):
     """A reduction function for a set of dice values where order doesn't matter."""
+    if len(values_of_interest) == 0:
+        return tuple(sorted(outcome))
+
     for value in copy(outcome):
         # Completely ignore dice that don't have values of interest
         if value not in values_of_interest:
