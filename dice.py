@@ -28,17 +28,17 @@ def reroll_dice(rerolls=3, num=2, sides=6):
     return [roll_dice(num, sides) for i in xrange(rerolls)]
 
 
-def keep_sixes(outcome):
-    """A keep strategy that keeps all dices that land on six."""
-    return [d for d in outcome if d == 6]
+def keep_value(outcome, values_of_interest):
+    """A keep strategy that keeps all dices that land on the given values."""
+    return [d for d in outcome if d in values_of_interest]
 
 
-def keep_none(outcome):
+def keep_none(outcome, values_of_interest=None):
     """A keep strategy that never keeps any dice."""
     return []
 
 
-def keep_unique(outcome):
+def keep_unique(outcome, values_of_interest=None):
     """A keep strategy that throws away duplicates."""
     return list(set(outcome))
 
@@ -84,7 +84,7 @@ def count_values(outcome, values_of_interest):
     return count
 
 
-def reroll_dice_with_choice(keep_strategy=keep_sixes, rerolls=3, num=2, sides=6):
+def reroll_dice_with_choice(keep_strategy=keep_none, rerolls=3, num=2, sides=6):
     """Perform multiple rerolls, but with the choice to keep some dice the same
     and reroll all the others. Return all rolls."""
     outcomes = []
@@ -105,7 +105,7 @@ def reroll_dice_with_choice(keep_strategy=keep_sixes, rerolls=3, num=2, sides=6)
     return outcomes
 
 
-def reroll_dice_with_choice_last_only(keep_strategy=keep_sixes, rerolls=3, num=2, sides=6):
+def reroll_dice_with_choice_last_only(keep_strategy=keep_none, rerolls=3, num=2, sides=6):
     """Perform multiple rerolls with choice, but only return the final result."""
     outcomes = reroll_dice_with_choice(keep_strategy, rerolls, num, sides)
     outcome = outcomes[-1]
@@ -183,7 +183,7 @@ def parse_arg_reduce_function(args):
         "unique": count_unique,
         # "combination": order_dice,
     }
-    if args == []:
+    if len(args) == 0:
         args = ["sum"]
 
     if args[0] in reduce_options:
@@ -198,12 +198,29 @@ def parse_arg_reduce_function(args):
     return func, reduce_args
 
 
-def parse_args():
+def parse_arg_keep_function(args):
     keep_options = {
         "none": keep_none,
-        "sixes": keep_sixes,
+        "value": keep_value,
         "unique": keep_unique,
     }
+    if args is None or len(args) == 0:
+        args = ["none"]
+
+    if args[0] in keep_options:
+        func = keep_options[args[0]]
+    else:
+        raise Exception("'--keep' parameter has to specify a valid keep strategy, " +
+                        " not '%s'. Valid options are: %s" % (args[0], keep_options.keys()))
+
+    keep_args = []
+    for arg in args[1:]:
+        keep_args.append(int(arg))
+
+    return func, keep_args
+
+
+def parse_args():
 
     parser = argparse.ArgumentParser(
         description="Simulating various dice throw situations.", add_help=False)
@@ -216,7 +233,7 @@ def parse_args():
                         help="Specify the number of sides for each individual die.")
     parser.add_argument("-r", dest="reroll", type=int, default=1,
                         help="Perform multiple rerolls (stats only count last roll).")
-    parser.add_argument("--keep", default="none", choices=keep_options.keys(),
+    parser.add_argument("--keep", nargs="*", metavar="strategy",
                         help="Choose a keeping strategy when performing rerolls.")
     parser.add_argument("--stats", nargs="*", metavar="reduce",
                         help="Performs multiple throws and outputs cumulative results. " +
@@ -227,7 +244,7 @@ def parse_args():
                         help="Print actual event counts instead of percentages in the statistical results.", )
     args = parser.parse_args()
 
-    args.keep = keep_options[args.keep]
+    args.keep = parse_arg_keep_function(args.keep)
 
     if args.stats is not None:
         args.stats = parse_arg_reduce_function(args.stats)
@@ -243,28 +260,40 @@ def parse_args():
 def main():
     settings = parse_args()
 
+    def keep_strategy(outcome):
+        return settings.keep[0](
+            outcome,
+            settings.keep[1] if len(settings.keep) == 2 else None
+        )
+
+    def reduce_func(outcome):
+        return settings.stats[0](
+            outcome,
+            settings.stats[1] if len(settings.stats) == 2 else None
+        )
+
     if settings.stats is not None:
         # Perform multiple simulations and output statistical results
         def perform_roll():
-            return settings.stats[0](
+            return reduce_func(
                 reroll_dice_with_choice_last_only(
-                    keep_strategy=settings.keep,
+                    keep_strategy=keep_strategy,
                     rerolls=settings.reroll,
                     num=settings.num,
                     sides=settings.sides),
-                settings.stats[1] if len(settings.stats) == 2 else None)
+            )
         run_multiple_times_and_print_stats(perform_roll,
                                            N=settings.N,
                                            use_percentages=not settings.counts)
     else:
         # Perform a single simulation and output results
         results = reroll_dice_with_choice(
-            keep_strategy=settings.keep,
+            keep_strategy=keep_strategy,
             rerolls=settings.reroll,
             num=settings.num,
             sides=settings.sides)
         for result in results:
-            print result
+            print "%s" % (result)
 
 
 if __name__ == "__main__":
