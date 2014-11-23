@@ -3,15 +3,15 @@ import sys
 if sys.version_info.major != 2:
     raise Exception("Only Python version 2 supported, not %s." %
                     ".".join(map(str, sys.version_info[0:3])))
-from random import randint
+import argparse
+import random
 from collections import OrderedDict
 from copy import copy
-import argparse
 
 
 def roll_die(sides=6):
     """Throw one die and return it's result."""
-    return randint(1, sides)
+    return random.randint(1, sides)
 
 
 def roll_dice(num=2, sides=6):
@@ -179,6 +179,8 @@ def run_multiple_times_and_print_stats(func, N=100, use_percentages=False):
 
 
 def parse_arg_reduce_function(args):
+    """Parse command-line arguments for the reduce function."""
+
     reduce_options = {
         "sum": sum_values,
         "order": order_dice,
@@ -202,6 +204,8 @@ def parse_arg_reduce_function(args):
 
 
 def parse_arg_keep_function(args):
+    """Parse command-line arguments for the keep strategy."""
+
     keep_options = {
         "none": keep_none,
         "value": keep_value,
@@ -224,6 +228,7 @@ def parse_arg_keep_function(args):
 
 
 def parse_args():
+    """Parse command-line arguments."""
 
     parser = argparse.ArgumentParser(
         description="Simulating various dice throw situations.", add_help=False)
@@ -245,17 +250,23 @@ def parse_args():
                         help="Set the number of simulations to run for statistical results.", )
     parser.add_argument("--counts", default=False, action="store_true",
                         help="Print actual event counts instead of percentages in the statistical results.", )
+    parser.add_argument("--seed", type=int,
+                        # "Set the seed value used for randomizing results."
+                        help=argparse.SUPPRESS)
     args = parser.parse_args()
+
+    if args.multi_sides is not None:
+        if len(args.multi_sides) != args.num:
+            raise Exception("'-ss' parameter has to specify the same number of values as there are dice.")
+        args.sides = args.multi_sides
 
     args.keep = parse_arg_keep_function(args.keep)
 
     if args.stats is not None:
         args.stats = parse_arg_reduce_function(args.stats)
 
-    if args.multi_sides is not None:
-        if len(args.multi_sides) != args.num:
-            raise Exception("'-ss' parameter has to specify the same number of values as there are dice.")
-        args.sides = args.multi_sides
+    if args.seed is not None:
+        random.seed(args.seed)
 
     return args
 
