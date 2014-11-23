@@ -182,17 +182,18 @@ def parse_arg_reduce_function(args):
     """Parse command-line arguments for the reduce function."""
 
     reduce_options = {
-        "sum": sum_values,
-        "order": order_dice,
-        "count": count_values,
-        "unique": count_unique,
+        "sum": (sum_values, "total sum of dice values in a throw"),
+        "order": (order_dice, "ordered dice values"),
+        "count": (count_values, "number of dice with the value %s"),
+        "unique": (count_unique, "number of unique dice in a throw"),
         # "combination": order_dice,
     }
     if len(args) == 0:
         args = ["sum"]
 
     if args[0] in reduce_options:
-        func = reduce_options[args[0]]
+        func = reduce_options[args[0]][0]
+        details = reduce_options[args[0]][1]
     else:
         raise Exception("'--stats' parameter has to specify a valid reduction function, " +
                         " not '%s'. Valid options are: %s" % (args[0], reduce_options.keys()))
@@ -200,7 +201,7 @@ def parse_arg_reduce_function(args):
     for arg in args[1:]:
         reduce_args.append(int(arg))
 
-    return func, reduce_args
+    return func, reduce_args, (details % reduce_args)
 
 
 def parse_arg_keep_function(args):
@@ -277,13 +278,13 @@ def main():
     def keep_strategy(outcome):
         return settings.keep[0](
             outcome,
-            settings.keep[1] if len(settings.keep) == 2 else None
+            settings.keep[1] if len(settings.keep) > 1 else None
         )
 
     def reduce_func(outcome):
         return settings.stats[0](
             outcome,
-            settings.stats[1] if len(settings.stats) == 2 else None
+            settings.stats[1] if len(settings.stats) > 1 else None
         )
 
     if settings.stats is not None:
@@ -296,6 +297,7 @@ def main():
                     num=settings.num,
                     sides=settings.sides),
             )
+        print "%s:" % settings.stats[2].capitalize()
         run_multiple_times_and_print_stats(perform_roll,
                                            N=settings.N,
                                            use_percentages=not settings.counts)
