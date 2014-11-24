@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""A command-line tool for simulating various dice throw situations."""
 import sys
 if sys.version_info.major != 2:
     raise Exception("Only Python version 2 supported, not %s." %
@@ -7,6 +8,8 @@ import argparse
 import random
 from collections import OrderedDict
 from copy import copy
+__author__ = "Simon Muller"
+__copyright__ = "Copyright 2014, Simon Muller"
 
 
 def roll_die(sides=6):
@@ -243,7 +246,7 @@ def parse_args():
     """Parse command-line arguments."""
 
     parser = argparse.ArgumentParser(
-        description="Simulating various dice throw situations.", add_help=False)
+        description="Simulate various dice throw situations.", add_help=False)
     parser.add_argument("-h", "--help", action="help", help="Show this help message and exit.")
     parser.add_argument("-n", dest="num", type=int, default=1,
                         help="Specify the number of dice to throw.")
@@ -253,12 +256,12 @@ def parse_args():
                         help="Specify the number of sides for each individual die.")
     parser.add_argument("-r", dest="reroll", type=int, default=1,
                         help="Perform multiple rerolls (stats only count last roll).")
-    parser.add_argument("--keep", nargs="*", metavar="strategy",
+    parser.add_argument("--keep", nargs="*", metavar="STRATEGY",
                         help="Choose a keeping strategy when performing rerolls.")
-    parser.add_argument("--stats", nargs="*", metavar="reduce",
+    parser.add_argument("--stats", nargs="*", metavar="REDUCE",
                         help="Performs multiple throws and outputs cumulative results. " +
                         "Provide a parameter to choose an approach for reducing a dice throw to a single value of interest.", )
-    parser.add_argument("-N", type=int, default=1000, metavar="simulations",
+    parser.add_argument("-N", type=int, default=1000, metavar="SIMULATIONS",
                         help="Set the number of simulations to run for statistical results.", )
     parser.add_argument("--counts", default=False, action="store_true",
                         help="Print actual event counts instead of percentages in the statistical results.", )

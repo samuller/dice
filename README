@@ -8,10 +8,10 @@ Usage
 -----
 
     usage: dice.py [-h] [-n NUM] [-s SIDES] [-ss [SIDES [SIDES ...]]] [-r REROLL]
-                   [--keep [strategy [strategy ...]]]
-                   [--stats [reduce [reduce ...]]] [-N simulations] [--counts]
+                   [--keep [STRATEGY [STRATEGY ...]]]
+                   [--stats [REDUCE [REDUCE ...]]] [-N SIMULATIONS] [--counts]
 
-    Simulating various dice throw situations.
+    Simulate various dice throw situations.
 
     optional arguments:
       -h, --help            Show this help message and exit.
@@ -20,13 +20,13 @@ Usage
       -ss [SIDES [SIDES ...]]
                             Specify the number of sides for each individual die.
       -r REROLL             Perform multiple rerolls (stats only count last roll).
-      --keep [strategy [strategy ...]]
+      --keep [STRATEGY [STRATEGY ...]]
                             Choose a keeping strategy when performing rerolls.
-      --stats [reduce [reduce ...]]
+      --stats [REDUCE [REDUCE ...]]
                             Performs multiple throws and outputs cumulative
                             results. Provide a parameter to choose an approach for
                             reducing a dice throw to a single value of interest.
-      -N simulations        Set the number of simulations to run for statistical
+      -N SIMULATIONS        Set the number of simulations to run for statistical
                             results.
       --counts              Print actual event counts instead of percentages in
                             the statistical results.
