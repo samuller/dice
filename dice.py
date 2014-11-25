@@ -208,25 +208,27 @@ def run_multiple_times_and_print_stats(func, N=100, use_percentages=False):
             print "%s: %d out of %d" % (k, v, total)
 
 
+REDUCE_ARG_OPTIONS = {
+    "sum": (sum_values, "total sum of dice values in a throw"),
+    "order": (order_dice, "ordered dice values"),
+    "count": (count_values, "number of dice with the value %s"),
+    "unique": (count_unique, "number of unique dice in a throw"),
+    "values": (dice_throw, "dice values"),
+}
+
+
 def parse_arg_reduce_function(args):
     """Parse command-line arguments for the reduce function."""
 
-    reduce_options = {
-        "sum": (sum_values, "total sum of dice values in a throw"),
-        "order": (order_dice, "ordered dice values"),
-        "count": (count_values, "number of dice with the value %s"),
-        "unique": (count_unique, "number of unique dice in a throw"),
-        "values": (dice_throw, "dice values"),
-    }
     if len(args) == 0:
         args = ["sum"]
 
-    if args[0] in reduce_options:
-        func = reduce_options[args[0]][0]
-        details = reduce_options[args[0]][1]
+    if args[0] in REDUCE_ARG_OPTIONS:
+        func = REDUCE_ARG_OPTIONS[args[0]][0]
+        details = REDUCE_ARG_OPTIONS[args[0]][1]
     else:
         raise Exception("'--stats' parameter has to specify a valid reduction function, " +
-                        " not '%s'. Valid options are: %s" % (args[0], reduce_options.keys()))
+                        " not '%s'. Valid options are: %s" % (args[0], REDUCE_ARG_OPTIONS.keys()))
     reduce_args = []
     for arg in args[1:]:
         reduce_args.append(int(arg))
@@ -234,23 +236,25 @@ def parse_arg_reduce_function(args):
     return func, reduce_args, (details % reduce_args)
 
 
+KEEP_ARG_OPTIONS = {
+    "none": keep_none,
+    "value": keep_value,
+    "unique": keep_unique,
+    "duplicate": keep_duplicates,
+}
+
+
 def parse_arg_keep_function(args):
     """Parse command-line arguments for the keep strategy."""
 
-    keep_options = {
-        "none": keep_none,
-        "value": keep_value,
-        "unique": keep_unique,
-        "duplicate": keep_duplicates,
-    }
     if args is None or len(args) == 0:
         args = ["none"]
 
-    if args[0] in keep_options:
-        func = keep_options[args[0]]
+    if args[0] in KEEP_ARG_OPTIONS:
+        func = KEEP_ARG_OPTIONS[args[0]]
     else:
         raise Exception("'--keep' parameter has to specify a valid keep strategy, " +
-                        " not '%s'. Valid options are: %s" % (args[0], keep_options.keys()))
+                        " not '%s'. Valid options are: %s" % (args[0], KEEP_ARG_OPTIONS.keys()))
 
     keep_args = []
     for arg in args[1:]:
@@ -274,10 +278,13 @@ def parse_args():
     parser.add_argument("-r", dest="reroll", type=int, default=1,
                         help="Perform multiple rerolls (stats only count last roll).")
     parser.add_argument("--keep", nargs="*", metavar="STRATEGY",
-                        help="Choose a keeping strategy when performing rerolls.")
+                        help="Choose a keeping strategy when performing rerolls. Options are: %s." %
+                             (KEEP_ARG_OPTIONS.keys(),))
     parser.add_argument("--stats", nargs="*", metavar="REDUCE",
                         help="Performs multiple throws and outputs cumulative results. " +
-                        "Provide a parameter to choose an approach for reducing a dice throw to a single value of interest.", )
+                        "Provide a parameter to choose an approach for reducing a " +
+                        "dice throw to a single value of interest. Options are: %s." %
+                        (REDUCE_ARG_OPTIONS.keys(),))
     parser.add_argument("-N", type=int, default=1000, metavar="SIMULATIONS",
                         help="Set the number of simulations to run for statistical results.", )
     parser.add_argument("--counts", default=False, action="store_true",

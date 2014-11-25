@@ -22,10 +22,13 @@ Usage
       -r REROLL             Perform multiple rerolls (stats only count last roll).
       --keep [STRATEGY [STRATEGY ...]]
                             Choose a keeping strategy when performing rerolls.
+                            Options are: ['none', 'unique', 'duplicate', 'value'].
       --stats [REDUCE [REDUCE ...]]
                             Performs multiple throws and outputs cumulative
                             results. Provide a parameter to choose an approach for
                             reducing a dice throw to a single value of interest.
+                            Options are: ['count', 'sum', 'unique', 'values',
+                            'order'].
       -N SIMULATIONS        Set the number of simulations to run for statistical
                             results.
       --counts              Print actual event counts instead of percentages in
