@@ -34,6 +34,55 @@ Usage
       --counts              Print actual event counts instead of percentages in
                             the statistical results.
 
+Examples
+--------
+
+    ./dice.py
+    [6]
+
+    ./dice.py -n 2
+    [6, 5]
+
+    ./dice.py -n 2 --stats sum
+    Total sum of dice values in a throw:
+    2: 2.50 %
+    3: 4.50 %
+    4: 7.70 %
+    5: 11.20 %
+    6: 14.70 %
+    7: 19.20 %
+    8: 13.40 %
+    9: 9.80 %
+    10: 8.40 %
+    11: 5.60 %
+    12: 3.00 %
+
+    ./dice.py -n 2 --stats count 1 6
+    Number of dice with the value [1, 6]:
+    0: 44.80 %
+    1: 43.60 %
+    2: 11.60 %
+
+    ./dice.py -n 6 -r 3
+    [6, 5, 3, 2, 4, 3]
+    [5, 2, 3, 4, 6, 4]
+    [2, 5, 4, 2, 6, 6]
+
+    ./dice.py -n 6 -r 3 --keep value 3
+    [6, 5, 3, 2, 4, 3]
+    [3, 3, 5, 2, 3, 4]
+    [3, 3, 3, 6, 4, 2]
+
+    ./dice.py -n 6 -r 3 --keep value 3 --stats count 3
+    Number of dice with the value [3]:
+    0: 4.50 %
+    1: 16.30 %
+    2: 26.70 %
+    3: 31.20 %
+    4: 15.70 %
+    5: 5.10 %
+    6: 0.50 %
+
 Terminology
 -----------
 * Keep strategy: 
