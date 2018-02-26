@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """A command-line tool for simulating various dice throw situations.
 
-Copyright (C) 2014  Simon Muller
+Copyright (C) 2014-2018  Simon Muller
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@ import random
 from collections import OrderedDict
 from copy import copy
 __author__ = "Simon Muller"
-__copyright__ = "Copyright 2014, Simon Muller"
+__copyright__ = "Copyright 2014-2018, Simon Muller"
 
 
 def roll_die(sides=6):
