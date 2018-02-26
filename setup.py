@@ -16,7 +16,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='sim-dice',
+    name='dice-sim',
     version=__version__,
     author='Simon Muller',
     author_email='samullers@gmail.com',
