@@ -126,8 +126,8 @@ def reroll_dice_with_choice(keep_strategy=keep_none, rerolls=3, num=2, sides=6):
                 new_outcome.append(d)
                 prev_outcome.remove(d)
             else:
-                assert False, "Keep_strategy() result is corrupt: %s from %s" % \
-                              (to_keep, prev_outcome)
+                assert False, "Keep_strategy() result is corrupt: {} from {}"\
+                    .format(to_keep, prev_outcome)
         new_outcome.extend(roll_dice(num - len(new_outcome), sides))
         outcomes.append(new_outcome)
     return outcomes
@@ -194,19 +194,19 @@ def run_multiple_times_and_print_stats(func, N=100, use_percentages=False):
         odds = OrderedDict(sorted(odds.items()))
         for k, v in odds.items():
             # Print probabilities as percentages
-            print("%s: %.2f %%" % (k, 100*v))
+            print("{}: {:>5.2f} %".format(k, 100*v))
     else:
         total = count_total_events(hist)
         # Use an ordered dict so that we can print with sorted keys
         hist = OrderedDict(sorted(hist.items()))
         for k, v in hist.items():
-            print("%s: %d out of %d" % (k, v, total))
+            print("{}: {:>{width}} out of {}".format(k, v, total, width=len(str(total))))
 
 
 REDUCE_ARG_OPTIONS = {
     "sum": (sum_values, "total sum of dice values in a throw"),
     "order": (order_dice, "ordered dice values"),
-    "count": (count_values, "number of dice with the value %s"),
+    "count": (count_values, "number of dice with the value {}"),
     "unique": (count_unique, "number of unique dice in a throw"),
     "values": (dice_throw, "dice values"),
 }
@@ -223,12 +223,12 @@ def parse_arg_reduce_function(args):
         details = REDUCE_ARG_OPTIONS[args[0]][1]
     else:
         raise Exception("'--stats' parameter has to specify a valid reduction function, " +
-                        " not '%s'. Valid options are: %s" % (args[0], REDUCE_ARG_OPTIONS.keys()))
+                        " not '{}'. Valid options are: {}".format(args[0], REDUCE_ARG_OPTIONS.keys()))
     reduce_args = []
     for arg in args[1:]:
         reduce_args.append(int(arg))
 
-    return func, reduce_args, (details % reduce_args)
+    return func, reduce_args, (details.format(reduce_args))
 
 
 KEEP_ARG_OPTIONS = {
@@ -249,7 +249,7 @@ def parse_arg_keep_function(args):
         func = KEEP_ARG_OPTIONS[args[0]]
     else:
         raise Exception("'--keep' parameter has to specify a valid keep strategy, " +
-                        " not '%s'. Valid options are: %s" % (args[0], KEEP_ARG_OPTIONS.keys()))
+                        " not '{}'. Valid options are: {}".format(args[0], KEEP_ARG_OPTIONS.keys()))
 
     keep_args = []
     for arg in args[1:]:
@@ -273,8 +273,8 @@ def parse_args():
     parser.add_argument("-r", dest="reroll", type=int, default=1,
                         help="Perform multiple rerolls (stats only count last roll).")
     parser.add_argument("--keep", nargs="*", metavar="STRATEGY",
-                        help="Choose a keeping strategy when performing rerolls. Options are: %s." %
-                             (KEEP_ARG_OPTIONS.keys(),))
+                        help="Choose a keeping strategy when performing rerolls. Options are: {}."
+                             .format(KEEP_ARG_OPTIONS.keys(),))
     parser.add_argument("--stats", nargs="*", metavar="REDUCE",
                         help="Performs multiple throws and outputs cumulative results. " +
                         "Provide a parameter to choose an approach for reducing a " +
@@ -330,7 +330,7 @@ def main():
                     num=settings.num,
                     sides=settings.sides),
             )
-        print("%s:" % settings.stats[2].capitalize())
+        print("{}:".format(settings.stats[2].capitalize()))
         run_multiple_times_and_print_stats(perform_roll,
                                            N=settings.N,
                                            use_percentages=not settings.counts)
