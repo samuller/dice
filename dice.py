@@ -18,9 +18,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 """
 import sys
-if sys.version_info.major != 2:
-    raise Exception("Only Python version 2 supported, not %s." %
-                    ".".join(map(str, sys.version_info[0:3])))
 import argparse
 import random
 from collections import OrderedDict
@@ -37,7 +34,7 @@ def roll_die(sides=6):
 def roll_dice(num=2, sides=6):
     """Throw multiple dice and return their results."""
     if type(sides) == int:
-        return [roll_die(sides) for i in xrange(num)]
+        return [roll_die(sides) for i in range(num)]
     elif type(sides) == list:
         assert len(sides) == num
         return [roll_die(s) for s in sides]
@@ -45,7 +42,7 @@ def roll_dice(num=2, sides=6):
 
 def reroll_dice(rerolls=3, num=2, sides=6):
     """Performs multiple dice rolls and and returns their results."""
-    return [roll_dice(num, sides) for i in xrange(rerolls)]
+    return [roll_dice(num, sides) for i in range(rerolls)]
 
 
 def keep_value(outcome, values_of_interest):
@@ -122,7 +119,7 @@ def reroll_dice_with_choice(keep_strategy=keep_none, rerolls=3, num=2, sides=6):
     and reroll all the others. Return all rolls."""
     outcomes = []
     outcomes.append(roll_dice(num, sides))
-    for i in xrange(rerolls - 1):
+    for i in range(rerolls - 1):
         prev_outcome = copy(outcomes[-1])
         to_keep = keep_strategy(prev_outcome)
         new_outcome = []
@@ -148,13 +145,13 @@ def reroll_dice_with_choice_last_only(keep_strategy=keep_none, rerolls=3, num=2,
 def reduce_many_dice_rolls(action=sum, times=100, num=2, sides=6):
     """Roll multiple dice many times and each time perform some action
     on the dice to calculate a single value. Return results as a generator."""
-    return (action(roll_dice(num, sides)) for i in xrange(times))
+    return (action(roll_dice(num, sides)) for i in range(times))
 
 
 def run_many_times(func, times=100):
     """Create a generator that returns the result of running the given function
     multiple times."""
-    return (func() for i in xrange(times))
+    return (func() for i in range(times))
 
 
 def count_outcomes(values):
@@ -199,13 +196,13 @@ def run_multiple_times_and_print_stats(func, N=100, use_percentages=False):
         odds = OrderedDict(sorted(odds.items()))
         for k, v in odds.iteritems():
             # Print probabilities as percentages
-            print "%s: %.2f %%" % (k, 100*v)
+            print("%s: %.2f %%" % (k, 100*v))
     else:
         total = count_total_events(hist)
         # Use an ordered dict so that we can print with sorted keys
         hist = OrderedDict(sorted(hist.items()))
         for k, v in hist.iteritems():
-            print "%s: %d out of %d" % (k, v, total)
+            print("%s: %d out of %d" % (k, v, total))
 
 
 REDUCE_ARG_OPTIONS = {
@@ -335,7 +332,7 @@ def main():
                     num=settings.num,
                     sides=settings.sides),
             )
-        print "%s:" % settings.stats[2].capitalize()
+        print("%s:" % settings.stats[2].capitalize())
         run_multiple_times_and_print_stats(perform_roll,
                                            N=settings.N,
                                            use_percentages=not settings.counts)
@@ -347,7 +344,7 @@ def main():
             num=settings.num,
             sides=settings.sides)
         for result in results:
-            print "%s" % (result)
+            print("%s" % (result))
 
 
 if __name__ == "__main__":
