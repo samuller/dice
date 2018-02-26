@@ -180,7 +180,7 @@ def hist_counts_to_probabilities(hist):
     """Convert a histogram of event counts into probabilities."""
     total = count_total_events(hist)
     # Divide number of events by total to get probabilities
-    for k, v in hist.iteritems():
+    for k, v in hist.items():
         hist[k] = (v / float(total))
     return hist
 
@@ -194,14 +194,14 @@ def run_multiple_times_and_print_stats(func, N=100, use_percentages=False):
         odds = hist_counts_to_probabilities(hist)
         # Use an ordered dict so that we can print with sorted keys
         odds = OrderedDict(sorted(odds.items()))
-        for k, v in odds.iteritems():
+        for k, v in odds.items():
             # Print probabilities as percentages
             print("%s: %.2f %%" % (k, 100*v))
     else:
         total = count_total_events(hist)
         # Use an ordered dict so that we can print with sorted keys
         hist = OrderedDict(sorted(hist.items()))
-        for k, v in hist.iteritems():
+        for k, v in hist.items():
             print("%s: %d out of %d" % (k, v, total))
 
 
