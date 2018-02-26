@@ -17,7 +17,6 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 """
-import sys
 import argparse
 import random
 from collections import OrderedDict
@@ -34,7 +33,7 @@ def roll_die(sides=6):
 def roll_dice(num=2, sides=6):
     """Throw multiple dice and return their results."""
     if type(sides) == int:
-        return [roll_die(sides) for i in range(num)]
+        return [roll_die(sides) for _ in range(num)]
     elif type(sides) == list:
         assert len(sides) == num
         return [roll_die(s) for s in sides]
@@ -42,7 +41,7 @@ def roll_dice(num=2, sides=6):
 
 def reroll_dice(rerolls=3, num=2, sides=6):
     """Performs multiple dice rolls and and returns their results."""
-    return [roll_dice(num, sides) for i in range(rerolls)]
+    return [roll_dice(num, sides) for _ in range(rerolls)]
 
 
 def keep_value(outcome, values_of_interest):
@@ -69,7 +68,7 @@ def keep_some_unique(outcome, num=5):
     """A keep strategy that throws away duplicates, but never keeps more than 'num' dice."""
     s = set(outcome)
     while len(s) > num:
-        elem = s.pop()
+        _ = s.pop()
     return list(s)
 
 
@@ -117,8 +116,7 @@ def dice_throw(outcome, values_of_interest):
 def reroll_dice_with_choice(keep_strategy=keep_none, rerolls=3, num=2, sides=6):
     """Perform multiple rerolls, but with the choice to keep some dice the same
     and reroll all the others. Return all rolls."""
-    outcomes = []
-    outcomes.append(roll_dice(num, sides))
+    outcomes = [roll_dice(num, sides)]
     for i in range(rerolls - 1):
         prev_outcome = copy(outcomes[-1])
         to_keep = keep_strategy(prev_outcome)
@@ -128,8 +126,8 @@ def reroll_dice_with_choice(keep_strategy=keep_none, rerolls=3, num=2, sides=6):
                 new_outcome.append(d)
                 prev_outcome.remove(d)
             else:
-                assert False, "Keep_strategy() result is corrupt: %s for %s" % \
-                              (to_keep, outcome)
+                assert False, "Keep_strategy() result is corrupt: %s from %s" % \
+                              (to_keep, prev_outcome)
         new_outcome.extend(roll_dice(num - len(new_outcome), sides))
         outcomes.append(new_outcome)
     return outcomes
@@ -145,13 +143,13 @@ def reroll_dice_with_choice_last_only(keep_strategy=keep_none, rerolls=3, num=2,
 def reduce_many_dice_rolls(action=sum, times=100, num=2, sides=6):
     """Roll multiple dice many times and each time perform some action
     on the dice to calculate a single value. Return results as a generator."""
-    return (action(roll_dice(num, sides)) for i in range(times))
+    return (action(roll_dice(num, sides)) for _ in range(times))
 
 
 def run_many_times(func, times=100):
     """Create a generator that returns the result of running the given function
     multiple times."""
-    return (func() for i in range(times))
+    return (func() for _ in range(times))
 
 
 def count_outcomes(values):
@@ -344,7 +342,7 @@ def main():
             num=settings.num,
             sides=settings.sides)
         for result in results:
-            print("%s" % (result))
+            print(result)
 
 
 if __name__ == "__main__":
