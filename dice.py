@@ -23,6 +23,7 @@ from collections import OrderedDict
 from copy import copy
 __author__ = "Simon Muller"
 __copyright__ = "Copyright 2014-2018, Simon Muller"
+__version__ = "1.0.0"
 
 
 def roll_die(sides=6):
@@ -262,8 +263,11 @@ def parse_args():
     """Parse command-line arguments."""
 
     parser = argparse.ArgumentParser(
-        description="Simulate various dice throw situations.", add_help=False)
+        description="Simulate various dice throw situations.", add_help=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-h", "--help", action="help", help="Show this help message and exit.")
+    parser.add_argument('--version', action='version',
+                        version='%(prog)s, version {}\nSimon Muller <samullers@gmail.com>'.format(__version__))
     parser.add_argument("-n", dest="num", type=int, default=1,
                         help="Specify the number of dice to throw.")
     parser.add_argument("-s", dest="sides", type=int, default=6,
