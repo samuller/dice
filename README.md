@@ -89,3 +89,9 @@ Terminology
   a strategy used to decide which dice to keep between rerolls
 * Reduction function: 
   a function for reducing a dice throw result to a single value of interest
+
+Installation
+------------
+
+    sudo pip install dice-sim
+
