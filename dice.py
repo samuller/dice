@@ -295,7 +295,7 @@ def parse_args():
 
     if args.multi_sides is not None:
         if len(args.multi_sides) != args.num:
-            raise Exception("'-ss' parameter has to specify the same number of values as there are dice.")
+            raise ValueError("'-ss' parameter has to specify the same number of values as there are dice ({}).".format(args.num))
         args.sides = args.multi_sides
 
     args.keep = parse_arg_keep_function(args.keep)
@@ -310,7 +310,11 @@ def parse_args():
 
 
 def main():
-    settings = parse_args()
+    try:
+        settings = parse_args()
+    except ValueError as exc:
+        print(exc)
+        exit()
 
     def keep_strategy(outcome):
         return settings.keep[0](
