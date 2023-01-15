@@ -1,15 +1,25 @@
-Intro
------
+Dice
+====
+
+[![PyPI Version](https://img.shields.io/pypi/v/dice-sim)](https://pypi.org/project/dice-sim/)
 
 A small script for running simulations with dice throws, including situations
 where you get multiple rerolls and can decide which dice to keep or reroll.
 
+Terminology
+-----------
+
+* Keep strategy:
+  a strategy used to decide which dice to keep between rerolls
+* Reduction function:
+  a function for reducing a dice throw result to a single value of interest
+
 Usage
 -----
 
-    usage: dice.py [-h] [-n NUM] [-s SIDES] [-ss [SIDES [SIDES ...]]] [-r REROLL]
-                   [--keep [STRATEGY [STRATEGY ...]]]
-                   [--stats [REDUCE [REDUCE ...]]] [-N SIMULATIONS] [--counts]
+    usage: dice [-h] [-n NUM] [-s SIDES] [-ss [SIDES [SIDES ...]]] [-r REROLL]
+                [--keep [STRATEGY [STRATEGY ...]]]
+                [--stats [REDUCE [REDUCE ...]]] [-N SIMULATIONS] [--counts]
 
     Simulate various dice throw situations.
 
@@ -37,13 +47,13 @@ Usage
 Examples
 --------
 
-    ./dice.py
+    dice
     [6]
 
-    ./dice.py -n 2
+    dice -n 2
     [6, 5]
 
-    ./dice.py -n 2 --stats sum
+    dice -n 2 --stats sum
     Total sum of dice values in a throw:
     2: 2.50 %
     3: 4.50 %
@@ -57,23 +67,23 @@ Examples
     11: 5.60 %
     12: 3.00 %
 
-    ./dice.py -n 2 --stats count 1 6
+    dice -n 2 --stats count 1 6
     Number of dice with the value [1, 6]:
     0: 44.80 %
     1: 43.60 %
     2: 11.60 %
 
-    ./dice.py -n 6 -r 3
+    dice -n 6 -r 3
     [6, 5, 3, 2, 4, 3]
     [5, 2, 3, 4, 6, 4]
     [2, 5, 4, 2, 6, 6]
 
-    ./dice.py -n 6 -r 3 --keep value 3
+    dice -n 6 -r 3 --keep value 3
     [6, 5, 3, 2, 4, 3]
     [3, 3, 5, 2, 3, 4]
     [3, 3, 3, 6, 4, 2]
 
-    ./dice.py -n 6 -r 3 --keep value 3 --stats count 3
+    dice -n 6 -r 3 --keep value 3 --stats count 3
     Number of dice with the value [3]:
     0: 4.50 %
     1: 16.30 %
@@ -83,15 +93,14 @@ Examples
     5: 5.10 %
     6: 0.50 %
 
-Terminology
------------
-* Keep strategy: 
-  a strategy used to decide which dice to keep between rerolls
-* Reduction function: 
-  a function for reducing a dice throw result to a single value of interest
-
 Installation
 ------------
 
     sudo pip install dice-sim
 
+Development
+-----------
+
+    python setup.py bdist_wheel --universal
+
+And run `./dice.py` directly instead of the global `dice` script.
