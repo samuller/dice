@@ -7,7 +7,7 @@ here = path.abspath(path.dirname(__file__))
 try:
     with open(path.join(here, 'requirements.txt')) as f:
         requirements = f.read().splitlines()
-except:
+except Exception:
     requirements = []
 
 # Get the long description from the README file

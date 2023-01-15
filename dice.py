@@ -69,7 +69,7 @@ def keep_some_unique(outcome, num=5):
     """A keep strategy that throws away duplicates, but never keeps more than 'num' dice."""
     s = set(outcome)
     while len(s) > num:
-        _ = s.pop()
+        s.pop()
     return list(s)
 
 
@@ -295,7 +295,8 @@ def parse_args():
 
     if args.multi_sides is not None:
         if len(args.multi_sides) != args.num:
-            raise ValueError("'-ss' parameter has to specify the same number of values as there are dice ({}).".format(args.num))
+            raise ValueError("'-ss' parameter has to specify the same number of values as there are dice ({})."
+                             .format(args.num))
         args.sides = args.multi_sides
 
     args.keep = parse_arg_keep_function(args.keep)
