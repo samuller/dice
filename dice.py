@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """A command-line tool for simulating various dice throw situations.
 
 Copyright (C) 2014-2018  Simon Muller

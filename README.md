@@ -10,9 +10,9 @@ Terminology
 -----------
 
 * Keep strategy:
-  a strategy used to decide which dice to keep between rerolls
+  a strategy used to decide which dice to keep between rerolls.
 * Reduction function:
-  a function for reducing a dice throw result to a single value of interest
+  a function for reducing a dice throw result to a single value of interest.
 
 Usage
 -----
