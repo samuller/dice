@@ -284,8 +284,8 @@ def parse_args():
                         "Provide a parameter to choose an approach for reducing a " +
                         "dice throw to a single value of interest. Options are: %s." %
                         (REDUCE_ARG_OPTIONS.keys(),))
-    parser.add_argument("-N", type=int, default=1000, metavar="SIMULATIONS",
-                        help="Set the number of simulations to run for statistical results.", )
+    parser.add_argument("-N", type=int, default=100_000, metavar="SIMULATIONS",
+                        help="Set the number of simulations to run for statistical results (default: 100_000).", )
     parser.add_argument("--counts", default=False, action="store_true",
                         help="Print actual event counts instead of percentages in the statistical results.", )
     parser.add_argument("--seed", type=int,
